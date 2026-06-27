@@ -1,0 +1,40 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: scheduler
+      POSTGRES_PASSWORD: scheduler
+      POSTGRES_DB: scheduler
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U scheduler -d scheduler"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+  app:
+    build: .
+    ports:
+      - "${APP_PORT:-8010}:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://scheduler:scheduler@db:5432/scheduler
+      SCHEDULER_POLL_INTERVAL_MS: "500"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8000/healthz\")'"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 15s
+    command: >
+      sh -c "
+        alembic upgrade head &&
+        uvicorn job_scheduler.main:app --host 0.0.0.0 --port 8000
+      "
+
+volumes:
+  pgdata:
