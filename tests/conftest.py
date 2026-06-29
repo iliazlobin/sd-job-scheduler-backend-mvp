@@ -3,7 +3,6 @@
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
-from sqlalchemy import text
 
 from job_scheduler.main import create_app
 
@@ -15,14 +14,6 @@ async def session():
 
     engine = create_async_engine(settings.database_url, echo=False)
     async with async_sessionmaker(engine, expire_on_commit=False)() as sess:
-        # Ensure UNIQUE constraint on tasks.name exists (migration may not have created it)
-        try:
-            await sess.execute(
-                text("ALTER TABLE tasks ADD CONSTRAINT tasks_name_key UNIQUE (name)")
-            )
-            await sess.commit()
-        except Exception:
-            await sess.rollback()
         yield sess
     await engine.dispose()
 
