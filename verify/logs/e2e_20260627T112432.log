@@ -1,92 +1,0 @@
-time="2026-06-27T11:24:32-07:00" level=warning msg="Docker Compose requires buildx plugin to be installed"
- Image sd-job-scheduler-backend-mvp-v202606271-app Building 
- Image sd-job-scheduler-backend-mvp-v202606271-app Building 
-Sending build context to Docker daemon  524.4kBSending build context to Docker daemon  1.573MBSending build context to Docker daemon  2.622MBSending build context to Docker daemon  3.671MBSending build context to Docker daemon   4.72MBSending build context to Docker daemon  5.768MBSending build context to Docker daemon  6.817MBSending build context to Docker daemon  7.866MBSending build context to Docker daemon  8.915MBSending build context to Docker daemon  9.964MBSending build context to Docker daemon  11.01MBSending build context to Docker daemon  12.06MBSending build context to Docker daemon  13.11MBSending build context to Docker daemon  14.16MBSending build context to Docker daemon  15.21MBSending build context to Docker daemon  16.78MBSending build context to Docker daemon  17.83MBSending build context to Docker daemon  18.88MBSending build context to Docker daemon  19.93MBSending build context to Docker daemon  20.98MBSending build context to Docker daemon  22.02MBSending build context to Docker daemon  23.07MBSending build context to Docker daemon  24.12MBSending build context to Docker daemon  25.17MBSending build context to Docker daemon  26.22MBSending build context to Docker daemon  27.27MBSending build context to Docker daemon  28.32MBSending build context to Docker daemon  29.37MBSending build context to Docker daemon  30.42MBSending build context to Docker daemon  31.46MBSending build context to Docker daemon  32.51MBSending build context to Docker daemon  33.56MBSending build context to Docker daemon  34.09MBSending build context to Docker daemon  35.13MBSending build context to Docker daemon  36.18MBSending build context to Docker daemon  37.23MBSending build context to Docker daemon  38.28MBSending build context to Docker daemon  39.33MBSending build context to Docker daemon  40.38MBSending build context to Docker daemon  41.43MBSending build context to Docker daemon  42.48MBSending build context to Docker daemon  42.78MB
-Step 1/17 : FROM python:3.12-slim AS builder
- ---> d764629ce0dd
-Step 2/17 : WORKDIR /build
- ---> Using cache
- ---> f5466f53e4d9
-Step 3/17 : COPY pyproject.toml .
- ---> Using cache
- ---> 0b3e28ced4b4
-Step 4/17 : COPY src/ src/
- ---> Using cache
- ---> f83ea5a67237
-Step 5/17 : RUN pip install --no-cache-dir .
- ---> Using cache
- ---> b9e23f4f3395
-Step 6/17 : FROM python:3.12-slim AS runtime
- ---> d764629ce0dd
-Step 7/17 : WORKDIR /app
- ---> Using cache
- ---> 21e90b914931
-Step 8/17 : COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
- ---> Using cache
- ---> 3b425469ad40
-Step 9/17 : COPY --from=builder /usr/local/bin/uvicorn /usr/local/bin/uvicorn
- ---> Using cache
- ---> dd2c762165e3
-Step 10/17 : COPY --from=builder /usr/local/bin/alembic /usr/local/bin/alembic
- ---> Using cache
- ---> 6174606ca8e2
-Step 11/17 : COPY alembic/ alembic/
- ---> Using cache
- ---> 0ba2ceff94ab
-Step 12/17 : COPY alembic.ini .
- ---> Using cache
- ---> 027471d45762
-Step 13/17 : COPY src/ src/
- ---> Using cache
- ---> d29b1b8a9da4
-Step 14/17 : ENV PYTHONUNBUFFERED=1
- ---> Using cache
- ---> 9301e659247a
-Step 15/17 : EXPOSE 8000
- ---> Using cache
- ---> 6142e1bd9cd5
-Step 16/17 : CMD ["uvicorn", "job_scheduler.main:app", "--host", "0.0.0.0", "--port", "8000"]
- ---> Using cache
- ---> 11f1c85da3f1
-Step 17/17 : LABEL com.docker.compose.image.builder=classic
- ---> Using cache
- ---> 281b20db40a3
-Successfully built 281b20db40a3
-Successfully tagged sd-job-scheduler-backend-mvp-v202606271-app:latest
- Image sd-job-scheduler-backend-mvp-v202606271-app Built 
- Image sd-job-scheduler-backend-mvp-v202606271-app Built 
- Network sd-job-scheduler-backend-mvp-v202606271_default Creating 
- Network sd-job-scheduler-backend-mvp-v202606271_default Created 
- Volume sd-job-scheduler-backend-mvp-v202606271_pgdata Creating 
- Volume sd-job-scheduler-backend-mvp-v202606271_pgdata Created 
- Container sd-job-scheduler-backend-mvp-v202606271-db-1 Creating 
- Container sd-job-scheduler-backend-mvp-v202606271-db-1 Created 
- Container sd-job-scheduler-backend-mvp-v202606271-app-1 Creating 
- Container sd-job-scheduler-backend-mvp-v202606271-app-1 Created 
- Container sd-job-scheduler-backend-mvp-v202606271-db-1 Starting 
- Container sd-job-scheduler-backend-mvp-v202606271-db-1 Started 
- Container sd-job-scheduler-backend-mvp-v202606271-db-1 Waiting 
- Container sd-job-scheduler-backend-mvp-v202606271-db-1 Healthy 
- Container sd-job-scheduler-backend-mvp-v202606271-app-1 Starting 
- Container sd-job-scheduler-backend-mvp-v202606271-app-1 Started 
-..............................                                           [100%]
-=============================== warnings summary ===============================
-verify/.venv/lib/python3.11/site-packages/_pytest/config/__init__.py:1464
-  /Users/iliazlobin/Hermes/projects/sd-job-scheduler-backend-mvp-v2026.06.27.1/verify/.venv/lib/python3.11/site-packages/_pytest/config/__init__.py:1464: PytestConfigWarning: Unknown config option: asyncio_mode
-  
-    self._warn_or_fail_if_strict(f"Unknown config option: {key}\n")
-
--- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-30 passed, 1 warning in 12.49s
- Container sd-job-scheduler-backend-mvp-v202606271-app-1 Stopping 
- Container sd-job-scheduler-backend-mvp-v202606271-app-1 Stopped 
- Container sd-job-scheduler-backend-mvp-v202606271-app-1 Removing 
- Container sd-job-scheduler-backend-mvp-v202606271-app-1 Removed 
- Container sd-job-scheduler-backend-mvp-v202606271-db-1 Stopping 
- Container sd-job-scheduler-backend-mvp-v202606271-db-1 Stopped 
- Container sd-job-scheduler-backend-mvp-v202606271-db-1 Removing 
- Container sd-job-scheduler-backend-mvp-v202606271-db-1 Removed 
- Network sd-job-scheduler-backend-mvp-v202606271_default Removing 
- Volume sd-job-scheduler-backend-mvp-v202606271_pgdata Removing 
- Volume sd-job-scheduler-backend-mvp-v202606271_pgdata Removed 
- Network sd-job-scheduler-backend-mvp-v202606271_default Removed 

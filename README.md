@@ -1,5 +1,9 @@
 # Job Scheduler — MVP
 
+[![Lint](https://github.com/iliazlobin/sd-job-scheduler-backend-mvp/actions/workflows/lint.yml/badge.svg)](https://github.com/iliazlobin/sd-job-scheduler-backend-mvp/actions/workflows/lint.yml)
+[![CI](https://github.com/iliazlobin/sd-job-scheduler-backend-mvp/actions/workflows/ci.yml/badge.svg)](https://github.com/iliazlobin/sd-job-scheduler-backend-mvp/actions/workflows/ci.yml)
+[![Functional](https://github.com/iliazlobin/sd-job-scheduler-backend-mvp/actions/workflows/functional.yml/badge.svg)](https://github.com/iliazlobin/sd-job-scheduler-backend-mvp/actions/workflows/functional.yml)
+
 A minimal distributed job scheduler: define tasks, schedule jobs (immediate or delayed), execute with at-least-once guarantees, automatic retries with exponential backoff, and full execution audit trail. Single-process Python/FastAPI app backed by PostgreSQL.
 
 ## Quick Start
@@ -201,11 +205,8 @@ Override via `.env` file or `docker compose -e VAR=value`. See `.env.example`.
 ├── pyproject.toml           # deps, pytest config, ruff config
 ├── alembic.ini
 ├── .env.example
-├── design.md                # module-level design decisions
+├── DESIGN.md                # architecture, data model, API, FR <-> acceptance-test map
 ├── DEPLOY.md                # deployment guide
-├── docs/
-│   ├── mvp-scope.md         # functional requirements + acceptance criteria
-│   └── system-design.md     # system design document
 └── README.md
 ```
 
@@ -227,7 +228,7 @@ API_BASE_URL=http://localhost:8010 pytest verify/acceptance/ -v
 docker compose down -v
 ```
 
-Each `test_fr*.py` file maps to one functional requirement from `docs/mvp-scope.md`:
+Each `test_fr*.py` file maps to one functional requirement (see the FR table in `DESIGN.md`):
 
 | File | FR | What it verifies |
 |------|----|-----------------|

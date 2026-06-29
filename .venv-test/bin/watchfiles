@@ -1,8 +1,0 @@
-#!/Users/iliazlobin/Hermes/projects/sd-job-scheduler-backend-mvp-v2026.06.27.1/.venv-test/bin/python3
-# -*- coding: utf-8 -*-
-import re
-import sys
-from watchfiles.cli import cli
-if __name__ == '__main__':
-    sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])
-    sys.exit(cli())
