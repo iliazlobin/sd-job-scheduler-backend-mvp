@@ -1,4 +1,4 @@
-"""White-box tests for Pydantic schema validation rules."""
+"""Unit tests for Pydantic schema validation rules (white-box)."""
 
 import uuid
 from datetime import datetime, timedelta, timezone

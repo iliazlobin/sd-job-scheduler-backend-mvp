@@ -9,33 +9,40 @@ on:
 jobs:
   functional:
     runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_USER: scheduler
-          POSTGRES_PASSWORD: scheduler
-          POSTGRES_DB: scheduler
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U scheduler -d scheduler"
-          --health-interval 5s
-          --health-timeout 3s
-          --health-retries 5
-
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install -e ".[dev]"
-      - name: Run migrations
-        env:
-          DATABASE_URL: postgresql+asyncpg://scheduler:scheduler@localhost:5432/scheduler
-        run: alembic upgrade head
-      - name: Run functional tests
-        env:
-          DATABASE_URL: postgresql+asyncpg://scheduler:scheduler@localhost:5432/scheduler
-        run: pytest tests/ -v
+      - name: Load manifest env
+        run: |
+          set -a
+          source verify/manifest.env
+          set +a
+          echo "PORT=$PORT" >> "$GITHUB_ENV"
+          echo "MODE=$MODE" >> "$GITHUB_ENV"
+          echo "UP=$UP" >> "$GITHUB_ENV"
+          echo "DOWN=$DOWN" >> "$GITHUB_ENV"
+          echo "READY=$READY" >> "$GITHUB_ENV"
+          echo "LOGS=$LOGS" >> "$GITHUB_ENV"
+      - name: Start stack
+        run: eval "$UP"
+      - name: Wait for ready
+        run: |
+          for i in $(seq 1 30); do
+            if eval "$READY" >/dev/null 2>&1; then
+              echo "Stack ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Stack not ready after 60s"
+          eval "$LOGS"
+          exit 1
+      - name: Install test deps & run functional suite
+        run: |
+          pip install httpx pytest
+          API_BASE_URL=http://localhost:${PORT} pytest tests/functional/ -v
+      - name: Tear down
+        if: always()
+        run: eval "$DOWN"

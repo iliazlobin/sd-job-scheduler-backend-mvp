@@ -1,4 +1,4 @@
-"""White-box tests for scheduler."""
+"""Unit tests for scheduler (white-box, import the app)."""
 
 import pytest
 import uuid

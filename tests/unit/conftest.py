@@ -1,4 +1,4 @@
-"""Test configuration — white-box tests that import the app."""
+"""Unit test configuration — white-box tests that import the app."""
 
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient

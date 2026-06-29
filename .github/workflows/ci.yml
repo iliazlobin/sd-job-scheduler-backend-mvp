@@ -38,9 +38,9 @@ jobs:
       - name: Run unit tests
         env:
           DATABASE_URL: postgresql+asyncpg://scheduler:scheduler@localhost:5432/scheduler
-        run: pytest tests/ -v
+        run: pytest tests/unit/ -v
 
-  e2e:
+  functional:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -72,10 +72,10 @@ jobs:
           echo "Stack not ready after 60s"
           eval "$LOGS"
           exit 1
-      - name: Install test deps & run acceptance
+      - name: Install test deps & run functional
         run: |
           pip install httpx pytest
-          API_BASE_URL=http://localhost:${PORT} pytest verify/acceptance/ -v
+          API_BASE_URL=http://localhost:${PORT} pytest tests/functional/ -v
       - name: Tear down
         if: always()
         run: eval "$DOWN"

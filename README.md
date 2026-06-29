@@ -16,9 +16,9 @@ docker compose up --build -d
 curl -sf http://localhost:8010/healthz
 # → {"status":"ok"}
 
-# 3. Run the acceptance suite (optional)
+# 3. Run the functional suite (optional)
 pip install httpx pytest
-API_BASE_URL=http://localhost:8010 pytest verify/acceptance/ -v
+API_BASE_URL=http://localhost:8010 pytest tests/functional/ -v
 
 # 4. Stop
 docker compose down        # keep data
@@ -178,14 +178,13 @@ Override via `.env` file or `docker compose -e VAR=value`. See `.env.example`.
 │   ├── env.py               # async Alembic config
 │   └── versions/
 │       └── 001_initial.py   # tables + enums + indexes
-├── tests/                   # white-box unit/integration tests (need DB)
-│   ├── test_task_service.py
-│   ├── test_job_service.py
-│   ├── test_scheduler.py
-│   └── test_schemas.py
-├── verify/
-│   ├── manifest.env         # e2e-verify config (MODE, PORT, UP, DOWN, READY, ACCEPTANCE)
-│   └── acceptance/          # black-box acceptance tests (need running app)
+├── tests/
+│   ├── unit/                # unit tests — white-box, import the app (need DB)
+│   │   ├── test_task_service.py
+│   │   ├── test_job_service.py
+│   │   ├── test_scheduler.py
+│   │   └── test_schemas.py
+│   └── functional/          # functional tests — black-box FR-1..FR-9 (need running app)
 │       ├── conftest.py      # fixtures: client, task_factory
 │       ├── test_fr1_create_task.py
 │       ├── test_fr2_immediate_job.py
@@ -196,39 +195,43 @@ Override via `.env` file or `docker compose -e VAR=value`. See `.env.example`.
 │       ├── test_fr7_history.py
 │       ├── test_fr8_cancel.py
 │       └── test_fr9_retry.py
+├── verify/
+│   └── manifest.env         # e2e-verify config (MODE, PORT, UP, DOWN, READY, ACCEPTANCE→tests/functional/)
 ├── .github/workflows/
-│   ├── ci.yml               # full pipeline: lint + unit + compose + acceptance + teardown
-│   ├── functional.yml       # functional tests only
+│   ├── ci.yml               # full pipeline: lint + unit + compose + functional + teardown
+│   ├── functional.yml       # functional suite only (compose up → tests/functional/ → teardown)
 │   └── lint.yml             # ruff lint
 ├── docker-compose.yml       # app + postgres:16-alpine
 ├── Dockerfile               # multi-stage Python 3.12-slim
 ├── pyproject.toml           # deps, pytest config, ruff config
 ├── alembic.ini
 ├── .env.example
-├── DESIGN.md                # architecture, data model, API, FR <-> acceptance-test map
+├── DESIGN.md                # architecture, data model, API, FR <-> functional-test map
 ├── DEPLOY.md                # deployment guide
 └── README.md
 ```
 
 ## Testing
 
-**White-box tests** (need a PostgreSQL database):
+Two tiers: **unit** (white-box, import the app, need a DB) and **functional** (black-box, drive the running app over HTTP).
+
+**Unit tests** (need a PostgreSQL database):
 
 ```bash
 pip install -e ".[dev]"
 export DATABASE_URL=postgresql+asyncpg://scheduler:scheduler@localhost:5432/scheduler
-pytest tests/ -v
+pytest tests/unit/ -v
 ```
 
-**Black-box acceptance tests** (need a running app):
+**Functional tests** (need a running app):
 
 ```bash
 docker compose up --build -d
-API_BASE_URL=http://localhost:8010 pytest verify/acceptance/ -v
+API_BASE_URL=http://localhost:8010 pytest tests/functional/ -v
 docker compose down -v
 ```
 
-Each `test_fr*.py` file maps to one functional requirement (see the FR table in `DESIGN.md`):
+Each `tests/functional/test_fr*.py` file maps to one functional requirement (see the FR table in `DESIGN.md`):
 
 | File | FR | What it verifies |
 |------|----|-----------------|

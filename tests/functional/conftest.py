@@ -1,4 +1,4 @@
-"""Black-box acceptance test configuration for Job Scheduler MVP.
+"""Black-box functional test configuration for Job Scheduler MVP.
 
 Talks to the RUNNING system via API_BASE_URL. No app imports.
 """
@@ -22,10 +22,10 @@ def client(api_base_url: str) -> httpx.Client:
 
 @pytest.fixture(scope="session")
 def task_factory(client: httpx.Client):
-    """Create a task and return its task_id. Cleans up nothing (acceptance tests own their data)."""
+    """Create a task and return its task_id. Cleans up nothing (functional tests own their data)."""
 
     def _create(
-        name: str = "acceptance-test-task", max_retries: int = 3, timeout_sec: int = 3600
+        name: str = "functional-test-task", max_retries: int = 3, timeout_sec: int = 3600
     ) -> dict:
         # Append UUID to ensure uniqueness across test runs
         unique_name = f"{name}-{uuid.uuid4().hex[:8]}"
