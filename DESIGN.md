@@ -5,7 +5,7 @@ them with at-least-once guarantees, retry failures with exponential backoff, and
 execution audit trail. Single-process FastAPI app backed by PostgreSQL.
 
 This document is the build's design of record: architecture, key decisions, data model, API, and the
-functional-requirement → acceptance-test contract. It is MVP-scoped — the broader target (a sharded,
+functional-requirement → functional-test contract. It is MVP-scoped — the broader target (a sharded,
 broker-backed scheduler fleet) is summarized inline under [Scope](#scope--limitations); the MVP
 deliberately stops short of it.
 
@@ -130,27 +130,27 @@ Job lifecycle:
    PENDING ──► CANCELLED   (client-initiated, only from PENDING)
 ```
 
-## 5. Functional requirements ↔ acceptance tests
+## 5. Functional requirements ↔ functional tests
 
-Each FR is proven by exactly one black-box acceptance test in `verify/acceptance/` that drives the
+Each FR is proven by exactly one black-box functional test in `tests/functional/` that drives the
 running service over HTTP (no app imports):
 
-| FR | Behaviour | Acceptance test |
+| FR | Behaviour | Functional test |
 |----|-----------|-----------------|
-| FR-1 | Create a task definition; missing `name` → `422` | `verify/acceptance/test_fr1_create_task.py` |
-| FR-2 | Schedule an immediate job → `201 PENDING` | `verify/acceptance/test_fr2_immediate_job.py` |
-| FR-3 | Schedule a delayed job at a future timestamp; past `scheduled_at` → `422` | `verify/acceptance/test_fr3_delayed_job.py` |
-| FR-4 | Duplicate `idempotency_key` → `200` with the same `job_id`, no new row | `verify/acceptance/test_fr4_idempotency.py` |
-| FR-5 | Scheduler claims a due job and runs `CLAIMED → RUNNING → SUCCESS/FAILED`, emitting an event per transition | `verify/acceptance/test_fr5_execution.py` |
-| FR-6 | `GET /jobs/{id}` returns full state; unknown id → `404` | `verify/acceptance/test_fr6_job_status.py` |
-| FR-7 | `GET /jobs/{id}/history` returns the paginated, ordered event log; unknown id → `404` | `verify/acceptance/test_fr7_history.py` |
-| FR-8 | Cancel `PENDING` → `200 CANCELLED`; non-pending → `409`; unknown → `404` | `verify/acceptance/test_fr8_cancel.py` |
-| FR-9 | Failed jobs auto-retry with exponential backoff up to `max_retries`, then stay `FAILED` | `verify/acceptance/test_fr9_retry.py` |
+| FR-1 | Create a task definition; missing `name` → `422` | `tests/functional/test_fr1_create_task.py` |
+| FR-2 | Schedule an immediate job → `201 PENDING` | `tests/functional/test_fr2_immediate_job.py` |
+| FR-3 | Schedule a delayed job at a future timestamp; past `scheduled_at` → `422` | `tests/functional/test_fr3_delayed_job.py` |
+| FR-4 | Duplicate `idempotency_key` → `200` with the same `job_id`, no new row | `tests/functional/test_fr4_idempotency.py` |
+| FR-5 | Scheduler claims a due job and runs `CLAIMED → RUNNING → SUCCESS/FAILED`, emitting an event per transition | `tests/functional/test_fr5_execution.py` |
+| FR-6 | `GET /jobs/{id}` returns full state; unknown id → `404` | `tests/functional/test_fr6_job_status.py` |
+| FR-7 | `GET /jobs/{id}/history` returns the paginated, ordered event log; unknown id → `404` | `tests/functional/test_fr7_history.py` |
+| FR-8 | Cancel `PENDING` → `200 CANCELLED`; non-pending → `409`; unknown → `404` | `tests/functional/test_fr8_cancel.py` |
+| FR-9 | Failed jobs auto-retry with exponential backoff up to `max_retries`, then stay `FAILED` | `tests/functional/test_fr9_retry.py` |
 
 ## 6. Test scenarios
 
-The white-box suite under `tests/` covers the important behaviours and edge cases beyond the per-FR
-acceptance contract:
+The unit suite under `tests/unit/` covers the important behaviours and edge cases beyond the per-FR
+functional contract:
 
 - **Idempotency** — same `idempotency_key` twice yields the same `job_id`, no duplicate row.
 - **Delayed execution** — a job with a future `scheduled_at` stays `PENDING` until its time arrives.
@@ -170,14 +170,15 @@ source of truth (no point-in-time logs are pasted here):
 [![CI](https://github.com/iliazlobin/sd-job-scheduler-backend-mvp/actions/workflows/ci.yml/badge.svg)](https://github.com/iliazlobin/sd-job-scheduler-backend-mvp/actions/workflows/ci.yml)
 [![Functional](https://github.com/iliazlobin/sd-job-scheduler-backend-mvp/actions/workflows/functional.yml/badge.svg)](https://github.com/iliazlobin/sd-job-scheduler-backend-mvp/actions/workflows/functional.yml)
 
-- **Lint** (`.github/workflows/lint.yml`) — `ruff check` + `ruff format --check`.
-- **CI** (`.github/workflows/ci.yml`) — white-box `tests/` against PostgreSQL, then the black-box
-  `verify/acceptance/` suite (all nine FRs) against the running Compose stack.
-- **Functional** (`.github/workflows/functional.yml`) — the §6 endpoint scenarios against a live database.
+- **Lint** (`.github/workflows/lint.yml`) — `ruff check`.
+- **CI** (`.github/workflows/ci.yml`) — the unit suite (`tests/unit/`) against PostgreSQL, then the
+  black-box functional suite (`tests/functional/`, all nine FRs) against the running Compose stack.
+- **Functional** (`.github/workflows/functional.yml`) — the functional suite (`tests/functional/`,
+  FR-1…FR-9) on its own against the running Compose stack.
 
-The §6 Test scenarios above map to the white-box `tests/` suite; the §5 FR table maps to
-`verify/acceptance/`. CI re-runs both on every push and on a daily schedule, so this section stays live
-rather than reflecting a single run.
+The §6 Test scenarios above map to the unit suite (`tests/unit/`); the §5 FR table maps to the
+functional suite (`tests/functional/`). CI re-runs both on every push and on a daily schedule, so this
+section stays live rather than reflecting a single run.
 
 ## Scope & limitations
 

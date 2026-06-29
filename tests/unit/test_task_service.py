@@ -1,4 +1,4 @@
-"""White-box tests for task service."""
+"""Unit tests for task service (white-box, import the app)."""
 
 import pytest
 import uuid

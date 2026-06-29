@@ -30,10 +30,10 @@ curl -sf http://localhost:8010/healthz
 docker compose ps
 ```
 
-### 3. Run acceptance tests
+### 3. Run functional tests
 
 ```bash
-API_BASE_URL=http://localhost:8010 pytest verify/acceptance/ -v
+API_BASE_URL=http://localhost:8010 pytest tests/functional/ -v
 ```
 
 ### 4. Stop the stack
@@ -121,8 +121,8 @@ alembic upgrade head
 uvicorn job_scheduler.main:app --reload --port 8010
 
 # 5. Run tests
-pytest tests/ -v                                    # White-box (needs DB)
-API_BASE_URL=http://localhost:8010 pytest verify/acceptance/ -v  # Black-box (needs running app)
+pytest tests/unit/ -v                                          # Unit (white-box, needs DB)
+API_BASE_URL=http://localhost:8010 pytest tests/functional/ -v  # Functional (black-box, needs running app)
 ```
 
 ## Verifying the Deployment
@@ -159,10 +159,10 @@ curl -sf http://localhost:8010/jobs/$JOB_ID | python3 -m json.tool
 curl -sf http://localhost:8010/jobs/$JOB_ID/history | python3 -m json.tool
 ```
 
-### Acceptance suite
+### Functional suite
 
 ```bash
-API_BASE_URL=http://localhost:8010 pytest verify/acceptance/ -v
+API_BASE_URL=http://localhost:8010 pytest tests/functional/ -v
 ```
 
 All 9 functional requirements should pass (FR-1 through FR-9).
@@ -226,9 +226,9 @@ docker compose exec db psql -U scheduler -d scheduler \
   -c "SELECT job_id, status, scheduled_at FROM jobs WHERE status = 'PENDING' ORDER BY scheduled_at;"
 ```
 
-### Acceptance tests timeout
+### Functional tests timeout
 
-Jobs may take up to 20 seconds to execute (the acceptance tests poll with a 20s deadline). If tests consistently timeout:
+Jobs may take up to 20 seconds to execute (the functional tests poll with a 20s deadline). If tests consistently timeout:
 - Check that the scheduler is running (see logs above)
 - Verify `SCHEDULER_POLL_INTERVAL_MS` is reasonable (default 500ms)
 - Ensure the database is responsive

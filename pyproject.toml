@@ -31,7 +31,10 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
-testpaths = ["tests"]
+# Default collection = the unit suite (white-box, needs a DB). The functional
+# suite (tests/functional/) needs a running app and is invoked explicitly by
+# path in CI and verify/manifest.env, so it is intentionally excluded here.
+testpaths = ["tests/unit"]
 
 [tool.ruff]
 line-length = 100
