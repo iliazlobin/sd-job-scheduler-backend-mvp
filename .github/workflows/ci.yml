@@ -54,6 +54,10 @@ jobs:
           set +a
           echo "PORT=$PORT" >> "$GITHUB_ENV"
           echo "MODE=$MODE" >> "$GITHUB_ENV"
+          echo "UP=$UP" >> "$GITHUB_ENV"
+          echo "DOWN=$DOWN" >> "$GITHUB_ENV"
+          echo "READY=$READY" >> "$GITHUB_ENV"
+          echo "LOGS=$LOGS" >> "$GITHUB_ENV"
       - name: Start stack
         run: eval "$UP"
       - name: Wait for ready
